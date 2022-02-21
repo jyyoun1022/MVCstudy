@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -53,12 +54,15 @@ public class BasicItemController {
         return "/basic/item";
     }
     @PostMapping("/add")
-    public String addItemV2(@ModelAttribute("item")Item item){
+    public String addItemV2(@ModelAttribute("item")Item item,
+                            RedirectAttributes redirectAttributes){
 
-        itemRepository.save(item);
-//        model.addAttribute("item",item);
+        Item saveItems = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId",saveItems.getId());
+        redirectAttributes.addAttribute("status",true);
 
-        return "/basic/item";
+
+        return "redirect:/basic/items/{itemId}";
     }
 //    @PostMapping("/add")
     public String addItemV3(@ModelAttribute Item item){
@@ -76,6 +80,23 @@ public class BasicItemController {
 
         return "/basic/item";
     }
+    @GetMapping("/{itemId}/edit")
+    public String editForm(@PathVariable Long itemId, Model model){
+        Item item = itemRepository.findByID(itemId);
+        model.addAttribute("item",item);
+
+        return "/basic/editForm";
+
+    }
+     @PostMapping("/{itemId}/edit")
+    public String edit(@PathVariable Long itemId,
+                       @ModelAttribute Item item){
+
+        itemRepository.update(itemId,item);
+
+        return "redirect:/basic/items/{itemId}";
+    }
+
 
 
     /**
